@@ -63,10 +63,8 @@ func readInput(inputChan chan<- string, stopChan <-chan struct{}, reader io.Read
 	for {
 		select {
 		case <-stopChan:
-			{
-				close(inputChan)
-				return
-			}
+			close(inputChan)
+			return
 		default:
 			if !isTesting {
 				fmt.Print("Введите текст: ")

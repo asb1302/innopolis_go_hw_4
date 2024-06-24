@@ -6,46 +6,26 @@ package task2
 
 Важно, чтобы были использованы владельцы каналов.
 */
+
 func splitNumbers(numbers []int) ([]int, []int) {
-	primeChan := make(chan int)
-	compositeChan := make(chan int)
-	done := make(chan bool)
-
-	// Владелец primeChan
-	go func() {
-		defer close(primeChan)
-		for _, n := range numbers {
-			if isPrime(n) {
-				primeChan <- n
-			}
-		}
-	}()
-
-	// Владелец compositeChan
-	go func() {
-		defer close(compositeChan)
-		for _, n := range numbers {
-			if !isPrime(n) {
-				compositeChan <- n
-			}
-		}
-	}()
+	primeChan, compositeChan := numberSplitter(numbers)
 
 	var primes []int
 	var composites []int
+	done := make(chan struct{}, 2)
 
 	go func() {
 		for n := range primeChan {
 			primes = append(primes, n)
 		}
-		done <- true
+		done <- struct{}{}
 	}()
 
 	go func() {
 		for n := range compositeChan {
 			composites = append(composites, n)
 		}
-		done <- true
+		done <- struct{}{}
 	}()
 
 	<-done
@@ -54,6 +34,28 @@ func splitNumbers(numbers []int) ([]int, []int) {
 	return primes, composites
 }
 
+// функция-владелец, которая создает и возвращает каналы
+func numberSplitter(numbers []int) (<-chan int, <-chan int) {
+	primeChan := make(chan int)
+	compositeChan := make(chan int)
+
+	go func() {
+		defer close(primeChan)
+		defer close(compositeChan)
+
+		for _, n := range numbers {
+			if isPrime(n) {
+				primeChan <- n
+			} else {
+				compositeChan <- n
+			}
+		}
+	}()
+
+	return primeChan, compositeChan
+}
+
+// see more: https://stackoverflow.com/questions/55010252/why-the-iteration-is-done-by-i6-every-time-and-why-the-condition-is-ii-n-for
 func isPrime(n int) bool {
 	if n <= 1 {
 		return false
