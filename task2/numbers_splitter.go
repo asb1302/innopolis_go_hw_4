@@ -55,7 +55,7 @@ func numberSplitter(numbers []int) (<-chan int, <-chan int) {
 	return primeChan, compositeChan
 }
 
-// see more: https://stackoverflow.com/questions/55010252/why-the-iteration-is-done-by-i6-every-time-and-why-the-condition-is-ii-n-for
+// see more: https://www.geeksforgeeks.org/introduction-to-primality-test-and-school-method/
 func isPrime(n int) bool {
 	if n <= 1 {
 		return false
